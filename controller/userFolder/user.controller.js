@@ -55,6 +55,15 @@ export const verifyAccount = async(request,response,next)=>{
         return response.status(500).json({err : "Internal server error"});
     }
 }
+// to get all user detail(just for developer use);
+export const getUserDetails = async(request,response,next)=>{
+    try{
+    const userList = await User.find();
+    return response.status(200).json({msg : userList})
+    }catch(err){
+        console.log(err);
+    }
+}
 // To send mail in email
 const sendEmail = (email,name)=>{
      return new Promise((resolve,reject)=>{
