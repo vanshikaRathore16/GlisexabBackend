@@ -19,5 +19,5 @@ const custometSchema = new mongoose.Schema({
     totalRides:{type : Number,default : 0},
     rating : {type : Number,default : 5.0}
 },{timestamps : true});
-const customer = mongoose.model("customer",custometSchema);
-export default customer;
+const Customer = mongoose.model("customer",custometSchema);
+export default Customer;

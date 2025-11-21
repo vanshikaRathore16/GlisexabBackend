@@ -7,7 +7,7 @@ const documentSchema = new mongoose.Schema({
     },
     type : {
         type : String,
-        enum : ["profile_photo","driving_license","vahicle_registration","insurance","pan_card"],
+        enum : ["driving_license","vahicle_registration","insurance"],
         required : true
     },
     imageName : {type : String,required : true},
