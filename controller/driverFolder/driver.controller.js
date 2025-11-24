@@ -45,9 +45,8 @@ export const uploadvehicleRegistration = async (request, response, next) => {
       console.log("❌ Driver not found");
       return response.status(400).json({ msg: "Driver not found" });
     }
-
-    console.log("🔥 FILE object:", request.file?.url);
-    console.log("🔥 BODY object:", request.file?.secure_url);
+    console.log("URL:", request.file?.path);
+console.log("Public ID:", request.file?.filename);
 
     console.log("🔥 Before Document.findOneAndUpdate()");
     const document = await Document.findOneAndUpdate(
