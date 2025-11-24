@@ -7,9 +7,18 @@ import {
   uploadvehicleRegistration,
 } from "../../controller/driverFolder/driver.controller.js";
 const router = express.Router();
+// router.post(
+//   "/vehicleRegistration/:userId",
+//   (req, res, next) => {
+//     console.log("📌 Route reached");
+//     next();
+//   },
+//   upload.single("vehicleRegistration"),
+//   uploadvehicleRegistration
+// );
 router.post(
   "/vehicleRegistration/:userId",
-  upload.single("rc"),
+  upload.single("vehicleRegistration"),
   uploadvehicleRegistration
 );
 router.post("/Insurance/:userId", upload.single("Insurance"), uploadInsurance);
