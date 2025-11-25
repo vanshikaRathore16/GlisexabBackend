@@ -25,6 +25,7 @@ export const createUser = async (request, response, next) => {
     return response.status(500).json({ err: "Internal server error" });
   }
 };
+
 // To logIn
 export const loginUser = async (request, response, next) => {
   try {
@@ -46,6 +47,7 @@ export const loginUser = async (request, response, next) => {
     return response.status(500).json({ err: "Internal server error" });
   }
 };
+
 // To verify account
 export const verifyAccount = async (request, response, next) => {
   try {
@@ -63,6 +65,9 @@ export const verifyAccount = async (request, response, next) => {
     return response.status(500).json({ err: "Internal server error" });
   }
 };
+// TO change password
+
+// ------------------------------------------------------------------------------------------------------
 // to get all user detail(just for developer use);
 export const getUserDetails = async (request, response, next) => {
   try {

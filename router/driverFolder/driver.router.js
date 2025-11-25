@@ -27,5 +27,5 @@ router.post(
   upload.single("DrivingLicense"),
   uploadDrivingLicense
 );
-router.post("/addVehicle", upload.array("images", 5), addvehicle);
+router.post("/addVehicle/:userId", upload.array("images", 5), addvehicle);
 export default router;

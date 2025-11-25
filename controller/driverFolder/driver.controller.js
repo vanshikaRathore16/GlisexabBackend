@@ -2,53 +2,22 @@ import { request, response } from "express";
 import Driver from "../../model/driverFolder/driver.model.js";
 import Vehicle from "../../model/driverFolder/vehicle.model.js";
 import Document from "../../model/driverFolder/document.model.js";
-// export const uploadvehicleRegistration = async (request, response, next) => {
-//   try {
-//     const { userId } = request.params;
-//     const driver = await Driver.findOne({ userId });
-//     if (!driver) return response.status(400).json({ msg: "Driver not found" });
-//     console.log("FILE:", request.file);
-//     console.log("BODY:", request.body);
-//     const document = await Document.findOneAndUpdate(
-//       { driverId: driver._id, type: "vahicle_registration" },
-//       {
-//         driverId: driver._id,
-//         type: "vahicle_registration",
-//         imageName: request.file.path ?? request.file.url,
-//         status: "pending",
-//       },
-//       { upsert: true }
-//     );
-//     console.log("after document");
-//     return response
-//       .status(200)
-//       .json({ success: true, msg: "vahicle_registration uploaded" });
-//   } catch (err) {
-//     console.log(err);
-//     return response.status(500).json({ err: "Internal server error" });
-//   }
-// };
 
 export const uploadvehicleRegistration = async (request, response, next) => {
-  console.log("🔥 Controller ENTERED");
-
+    // console.log("Controller ENTERED");
   try {
-    console.log("➡ userId:", request.params.userId);
-
+    // console.log("➡ userId:", request.params.userId);
     const { userId } = request.params;
-
-    console.log("🔥 Before Driver.findOne()");
+    // console.log("🔥 Before Driver.findOne()");
     const driver = await Driver.findOne({ userId });
-    console.log("🔥 After Driver.findOne()", driver);
-
+    // console.log("🔥 After Driver.findOne()", driver);
     if (!driver) {
-      console.log("❌ Driver not found");
+      // console.log("❌ Driver not found");
       return response.status(400).json({ msg: "Driver not found" });
     }
-    console.log("URL:", request.file?.path);
-console.log("Public ID:", request.file?.filename);
-
-    console.log("🔥 Before Document.findOneAndUpdate()");
+    // console.log("URL:", request.file?.path);
+    // console.log("Public ID:", request.file?.filename);
+    // console.log("🔥 Before Document.findOneAndUpdate()");
     const document = await Document.findOneAndUpdate(
       { driverId: driver._id, type: "vahicle_registration" },
       {
@@ -59,9 +28,8 @@ console.log("Public ID:", request.file?.filename);
       },
       { upsert: true, new: true }
     );
-    console.log("🔥 After Document.findOneAndUpdate()", document);
-
-    console.log("🔥 Sending response...");
+    // console.log("🔥 After Document.findOneAndUpdate()", document);
+    // console.log("🔥 Sending response...");
     return response.status(200).json({
       success: true,
       msg: "vahicle_registration uploaded",
