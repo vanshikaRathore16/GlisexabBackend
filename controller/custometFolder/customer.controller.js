@@ -17,21 +17,6 @@ export const getCustometProfile = async (request, response, next) => {
   }
 };
 
-// export const updateCustomerProfile = async (request, response, next) => {
-//   try {
-//     const {userId} = request.params;
-//     const updatedCustomer = await Customer.updateOne(
-//       { userId },
-//       { $set: request.body },
-//       { upsert: true }
-//     );
-//     return response.status(200).json({ msg: "Profile updated successfully" });
-//   } catch (err) {
-//     console.log(err);
-//     return response.status(500).json({ err: "Internal server error" });
-//   }
-// };
-
 export const updateCustomerProfile = async(request,response,next)=>{
   try{
     const {userId} = request.params;
@@ -59,6 +44,21 @@ export const updateCustomerProfile = async(request,response,next)=>{
     }
     await customer.save();
     return response.status(200).json({success : true,msg : "Profile updated successfully"});
+  }catch(err){
+    console.log(err);
+    return response.status(500).json({err : "Internal server error"});
+  }
+}
+
+export const getCustomerDetails = async(request,response,next)=>{
+  try{
+   const {userId} = request.params;
+   const user = await User.findById(userId);
+   if(!user)
+    return response.status(404).json({msg : "User not found"});
+  const customer = await Customer.findOne({userId});
+  const profile = {user,customer};
+  return response.status(200).json({msg : profile});
   }catch(err){
     console.log(err);
     return response.status(500).json({err : "Internal server error"});
