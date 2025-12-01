@@ -2,9 +2,10 @@ import { request, response } from "express";
 import Driver from "../../model/driverFolder/driver.model.js";
 import Vehicle from "../../model/driverFolder/vehicle.model.js";
 import Document from "../../model/driverFolder/document.model.js";
+import User from "../../model/userFolder/user.model.js";
 
 export const uploadvehicleRegistration = async (request, response, next) => {
-    // console.log("Controller ENTERED");
+  // console.log("Controller ENTERED");
   try {
     // console.log("➡ userId:", request.params.userId);
     const { userId } = request.params;
@@ -87,7 +88,7 @@ export const uploadDrivingLicense = async (request, response, next) => {
     return response.status(500).json({ err: "Internal server error" });
   }
 };
-
+// to add to vehicvle
 export const addvehicle = async (request, response, next) => {
   try {
     const { userId } = request.params;
@@ -117,5 +118,47 @@ export const addvehicle = async (request, response, next) => {
   } catch (err) {
     console.log(err);
     return response.status(500).json({ err: "Internal server error" });
+  }
+};
+
+//  to Toggle this
+export const taggleOnlineStatus = async (request, response, next) => {
+  try {
+    const { userId } = request.params;
+    const driver = await Driver.findOne({ userId });
+    if (!driver) return response.status(404).json({ msg: "Driver not found" });
+    driver.isOnline = !driver.isOnline;
+    await driver.save();
+    return response.status(200).json({
+      success: true,
+      msg: `Driver is now${driver.isOnline ? "online" : "offline"}`,
+    });
+  } catch (err) {
+    console.log(err);
+    return response.status(500).json({ err: "Internal server error" });
+  }
+};
+
+// toGetAllInformation about Driver
+export const getDriverFullDetails = async (request, response) => {
+  try {
+    const { userId } = request.params;
+    const driver = await Driver.findOne({ userId }).populate("userId");
+    if (!driver) {
+      return response.status(404).json({ msg: "Driver not found" });
+    }
+    const vehicle = await Vehicle.findOne({ driverId: driver._id });
+    const documents = await Document.find({ driverId: driver._id });
+    return response.status(200).json({
+      success: true,
+      message: "Driver full details fetched",
+      user: driver.userId,
+      driver: driver,
+      vehicle: vehicle || {},
+      documents: documents || [],
+    });
+  } catch (err) {
+    console.log("Error:", err);
+    return response.status(500).json({ error: "Internal Server Error" });
   }
 };

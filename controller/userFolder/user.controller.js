@@ -66,28 +66,29 @@ export const verifyAccount = async (request, response, next) => {
   }
 };
 // TO change password
-export const changePassword = async(request,response,next)=>{
-  try{
-    const {userId} = request.params;
-    const {oldPassword,newPassword} = request.body;
-    if(!oldPassword || !newPassword)
-      return response.status(400).json({msg : 'Both are required'});
+export const changePassword = async (request, response, next) => {
+  try {
+    const { userId } = request.params;
+    const { oldPassword, newPassword } = request.body;
+    if (!oldPassword || !newPassword)
+      return response.status(400).json({ msg: "Both are required" });
     const user = await User.findById(userId);
-    if(!user)
-      return response.status(404).json({msg : 'user not found'});
-    const isMatch = await bcrypt.compare(oldPassword,user.password);
-    if(!isMatch)
-      return response.status(401).json({err : "Old password is incorrect"});
+    if (!user) return response.status(404).json({ msg: "user not found" });
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch)
+      return response.status(401).json({ err: "Old password is incorrect" });
     const salt = await bcrypt.genSalt(12);
-    const hashed = await bcrypt.hash(newPassword,salt);
+    const hashed = await bcrypt.hash(newPassword, salt);
     user.password = hashed;
     await user.save();
-    return response.status(200).json({success : true,msg : "password changed successfullt"});
-  }catch(err){
+    return response
+      .status(200)
+      .json({ success: true, msg: "password changed successfullt" });
+  } catch (err) {
     console.log(err);
-    return response.status(500).json({err : "Internal server error"});
+    return response.status(500).json({ err: "Internal server error" });
   }
-}
+};
 // ------------------------------------------------------------------------------------------------------
 // to get all user detail(just for developer use);
 export const getUserDetails = async (request, response, next) => {
