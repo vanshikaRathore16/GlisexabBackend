@@ -238,7 +238,7 @@ export const customerRespondToDriverOffer = async (req, res) => {
     // ✅ 2. CUSTOMER ACCEPTS OFFER
     if (acceptedPrice) {
       ride.finalAgreedPrice = acceptedPrice;
-      ride.status = "accepted"; // matches your schema
+      ride.status = "accepted";
       await ride.save();
       return res.status(200).json({
         message: "Offer accepted successfully",
