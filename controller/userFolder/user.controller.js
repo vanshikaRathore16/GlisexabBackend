@@ -179,6 +179,7 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
+// get user by id
 // To send mail in email
 const sendEmail = (email, name) => {
   return new Promise((resolve, reject) => {
