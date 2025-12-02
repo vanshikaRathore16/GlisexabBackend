@@ -5,7 +5,16 @@ import Driver from "../../model/driverFolder/driver.model.js";
 import Vehicle from "../../model/driverFolder/vehicle.model.js";
 // import Ride from "../../model/driverFolder/ride.model.js";
 import { nanoid } from "nanoid";
-
+//  to get all rides
+export const getAllRide = async (request, response, next) => {
+  try {
+    let rideList = await Ride.find();
+    return response.status(200).json({ list: rideList });
+  } catch (err) {
+    console.log(err);
+    return response.status(500).json({ err: "Internal server error" });
+  }
+};
 // To create ride
 export const createRide = async (req, res) => {
   try {
@@ -153,5 +162,94 @@ export const getRideRequestsForDriver = async (req, res, next) => {
   } catch (err) {
     console.log("🔥 ERROR:", err);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// driver counter price
+export const driverBargain = async (req, res) => {
+  try {
+    const { rideId, driverId, driverCounterPrice } = req.body;
+    if (!rideId || !driverId || !driverCounterPrice) {
+      return res.status(400).json({
+        error: "rideId, driverId, and driverCounterPrice are required",
+      });
+    }
+    const ride = await Ride.findById(rideId);
+    if (!ride) {
+      return res.status(404).json({ error: "Ride not found" });
+    }
+    if (ride.status !== "requested") {
+      return res.status(400).json({
+        error: "Driver cannot send offer now, ride is no longer available",
+      });
+    }
+    const updatedRide = await Ride.findByIdAndUpdate(
+      rideId,
+      {
+        $set: {
+          driverId: driverId,
+          driverCounterPrice: driverCounterPrice,
+          status: "offer_sent",
+        },
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      message: "Driver offer sent successfully",
+      ride: updatedRide,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// customer accept the offer
+export const customerRespondToDriverOffer = async (req, res) => {
+  try {
+    const { rideId, customerId, acceptedPrice, reject } = req.body;
+    if (!rideId || !customerId) {
+      return res.status(400).json({
+        error: "rideId and customerId are required",
+      });
+    }
+    const ride = await Ride.findById(rideId);
+    if (!ride) return res.status(404).json({ error: "Ride not found" });
+    console.log("ride customer id", ride.customerId.toString());
+    console.log("customer id", customerId);
+    if (ride.customerId.toString() !== customerId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+    if (ride.status !== "offer_sent") {
+      return res.status(400).json({
+        error: "Ride is not in offer stage",
+      });
+    }
+    // 1. CUSTOMER REJECTS OFFER
+    if (reject === true) {
+      ride.driverCounterPrice = null;
+      ride.status = "requested"; // back to ride pool (like inDrive)
+      await ride.save();
+      return res.status(200).json({
+        message: "Offer rejected. Searching for new drivers...",
+        ride,
+      });
+    }
+    // ✅ 2. CUSTOMER ACCEPTS OFFER
+    if (acceptedPrice) {
+      ride.finalAgreedPrice = acceptedPrice;
+      ride.status = "accepted"; // matches your schema
+      await ride.save();
+      return res.status(200).json({
+        message: "Offer accepted successfully",
+        ride,
+      });
+    }
+    return res.status(400).json({
+      error: "Send either acceptedPrice or reject: true",
+    });
+  } catch (err) {
+    console.log("🔥 ERROR:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };

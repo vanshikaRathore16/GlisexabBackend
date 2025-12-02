@@ -17,6 +17,9 @@ import {
 import {
   createRide,
   getRideRequestsForDriver,
+  driverBargain,
+  customerRespondToDriverOffer,
+  getAllRide,
 } from "../../controller/driverFolder/ride.controller.js";
 
 const router = express.Router();
@@ -44,7 +47,9 @@ router.delete("/deleteRideType/:id", deleteRideType);
 router.get("/getRideType", getRideTypes);
 
 // --------------------------------------------Create ride(main)-------------------------------------//
+router.get("/allRides", getAllRide);
 router.post("/createRide", createRide);
 router.get("/driverRideRequests", getRideRequestsForDriver);
-
+router.post("/driver-bargain", driverBargain);
+router.post("/customer-response", customerRespondToDriverOffer);
 export default router;
