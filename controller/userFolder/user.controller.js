@@ -3,29 +3,80 @@ import User from "../../model/userFolder/user.model.js";
 import bcrypt, { compare } from "bcrypt";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-
+import Driver from "../../model/driverFolder/driver.model.js";
 dotenv.config();
 // To signUp user
+// export const createUser = async (request, response, next) => {
+//   try {
+//     let { name, email, contact, password, role } = request.body;
+//     console.log("password", password);
+//     const exitUser = await User.findOne({ email });
+//     if (exitUser)
+//       return response.status(400).json({ err: "Email already register" });
+//     const salt = await bcrypt.genSalt(12);
+//     password = await bcrypt.hash(password, salt);
+//     let user = await User.create({ name, email, password, contact, role });
+//     sendEmail(email, name);
+//     return response.status(201).json({
+//       msg: "User created successFully! Check your mail for verify email",
+//     });
+//   } catch (err) {
+//     console.log(err);
+//     return response.status(500).json({ err: "Internal server error" });
+//   }
+// };
 export const createUser = async (request, response, next) => {
   try {
     let { name, email, contact, password, role } = request.body;
-    console.log("password", password);
-    const exitUser = await User.findOne({ email });
-    if (exitUser)
-      return response.status(400).json({ err: "Email already register" });
+
+    // 1️⃣ Check email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return response.status(400).json({ err: "Email already registered" });
+
+    // 2️⃣ Hash password
     const salt = await bcrypt.genSalt(12);
     password = await bcrypt.hash(password, salt);
-    let user = await User.create({ name, email, password, contact, role });
+
+    // 3️⃣ Create user in User table
+    const user = await User.create({
+      name,
+      email,
+      password,
+      constact: contact,
+      role,
+    });
+
+    // 4️⃣ Create role-based profile
+    if (role === "driver") {
+      await Driver.create({
+        userId: user._id,
+        isOnline: false,
+        isAvailable: false,
+        isApproved: false,
+      });
+    }
+
+    if (role === "customer") {
+      await Customer.create({
+        userId: user._id,
+        savedAddress: [],
+        emergencyContacts: [],
+      });
+    }
+
+    // 5️⃣ Send verification email
     sendEmail(email, name);
+
     return response.status(201).json({
-      msg: "User created successFully! Check your mail for verify email",
+      msg: "User created successfully! Check your email for verification.",
+      userId: user._id,
     });
   } catch (err) {
     console.log(err);
     return response.status(500).json({ err: "Internal server error" });
   }
 };
-
 // To logIn
 export const loginUser = async (request, response, next) => {
   try {
@@ -99,6 +150,35 @@ export const getUserDetails = async (request, response, next) => {
     console.log(err);
   }
 };
+
+// to delete user
+export const deleteUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+    // delete user
+    console.log(userId);
+    const user1 = await User.findById(userId);
+    console.log(user1);
+    const user = await User.findByIdAndDelete(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    // delete driver linked to this user
+    await Driver.findOneAndDelete({ userId: userId });
+    return res
+      .status(200)
+      .json({ message: "User and related driver deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 // To send mail in email
 const sendEmail = (email, name) => {
   return new Promise((resolve, reject) => {

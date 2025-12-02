@@ -14,6 +14,10 @@ import {
   deleteRideType,
   getRideTypes,
 } from "../../controller/driverFolder/rideType.controller.js";
+import {
+  createRide,
+  getRideRequestsForDriver,
+} from "../../controller/driverFolder/ride.controller.js";
 
 const router = express.Router();
 router.post(
@@ -38,4 +42,9 @@ router.put("/updateRideType/:id", updateRideType);
 router.delete("/deleteRideType/:id", deleteRideType);
 // Public
 router.get("/getRideType", getRideTypes);
+
+// --------------------------------------------Create ride(main)-------------------------------------//
+router.post("/createRide", createRide);
+router.get("/driverRideRequests", getRideRequestsForDriver);
+
 export default router;
