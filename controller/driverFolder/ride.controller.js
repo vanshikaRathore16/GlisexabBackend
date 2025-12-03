@@ -253,3 +253,34 @@ export const customerRespondToDriverOffer = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// now driver accept ride
+export const driverAcceptRide = async (req, res, next) => {
+  try {
+    const { rideId, driverId } = req.body;
+    if (!rideId || !driverId)
+      return res
+        .status(400)
+        .json({ error: "rideId and driverId are required" });
+    const ride = await Ride.findById(rideId);
+    if (!ride) return res.status(404).json({ error: "Ride not found" });
+    // Ride must be accepted by customer
+    if (!["requested", "accepted"].includes(ride.status)) {
+      return res.status(400).json({
+        error: `Ride cannot be accepted in current status: ${ride.status}`,
+      });
+    }
+    ride.driverId = driverId;
+    ride.otp = Math.floor(1000 + Math.random() * 9000).toString();
+    ride.status = "arrived";
+    await ride.save();
+    return res.status(200).json({
+      message: "Ride accepted by driver",
+      otp: ride.otp,
+      ride,
+    });
+  } catch (err) {
+    console.log(err);
+    return response.status(500).json({ err: "Internal server error" });
+  }
+};

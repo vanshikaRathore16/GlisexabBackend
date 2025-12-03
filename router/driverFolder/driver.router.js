@@ -20,6 +20,7 @@ import {
   driverBargain,
   customerRespondToDriverOffer,
   getAllRide,
+  driverAcceptRide,
 } from "../../controller/driverFolder/ride.controller.js";
 
 const router = express.Router();
@@ -52,4 +53,5 @@ router.post("/createRide", createRide);
 router.get("/driverRideRequests", getRideRequestsForDriver);
 router.post("/driver-bargain", driverBargain);
 router.post("/customer-response", customerRespondToDriverOffer);
+router.post("/driverAcceptRide", driverAcceptRide);
 export default router;
