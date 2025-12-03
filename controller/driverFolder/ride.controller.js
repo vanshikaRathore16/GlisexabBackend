@@ -284,3 +284,147 @@ export const driverAcceptRide = async (req, res, next) => {
     return response.status(500).json({ err: "Internal server error" });
   }
 };
+
+// driver Start Ride
+export const startRide = async (req, res, next) => {
+  try {
+    const { rideId, driverId, otp } = req.body;
+    if (!rideId || !driverId || !otp) {
+      return res.status(400).json({
+        error: "rideId, driverId, and otp are required",
+      });
+    }
+    const ride = await Ride.findById(rideId);
+    if (!ride) return res.status(404).json({ error: "Ride not found" });
+    if (ride.driverId?.toString() !== driverId) {
+      return res
+        .status(403)
+        .json({ error: "Driver is not assigned to this ride" });
+    }
+    if (ride.status !== "arrived") {
+      return res.status(400).json({
+        error: `Ride cannot be started. Current status: ${ride.status}`,
+      });
+    }
+    if (ride.otp !== otp) {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+    ride.status = "ongoing";
+    ride.actualStartTime = new Date();
+    await ride.save();
+    return res.status(200).json({
+      message: "Ride started successfully",
+      ride,
+    });
+  } catch (err) {
+    console.log(err);
+    return response.status(500).json({ err: "Internal server error" });
+  }
+};
+
+// End the Ride
+export const endRide = async (req, res) => {
+  try {
+    const { rideId, driverId } = req.body;
+    if (!rideId || !driverId)
+      return res
+        .status(400)
+        .json({ error: "rideId and driverId are required" });
+    const ride = await Ride.findById(rideId);
+    if (!ride) return res.status(404).json({ error: "Ride not found" });
+    if (ride.driverId?.toString() !== driverId) {
+      return res
+        .status(403)
+        .json({ error: "You are not assigned to this ride" });
+    }
+    if (ride.status !== "ongoing") {
+      return res.status(400).json({
+        error: `Ride cannot be ended when status = ${ride.status}`,
+      });
+    }
+    ride.actualEndTime = new Date();
+    ride.status = "completed";
+    ride.paymentStatus = "pending";
+    await ride.save();
+
+    return res.status(200).json({
+      message: "Ride completed successfully",
+      ride,
+    });
+  } catch (err) {
+    console.log(err);
+    return response.status(500).json({ err: "Internal server error" });
+  }
+};
+
+// Ride cancel by customer
+export const customerCancelRide = async (req, res) => {
+  try {
+    const { rideId, customerId, reason } = req.body;
+    if (!rideId || !customerId)
+      return res
+        .status(400)
+        .json({ error: "rideId and customerId are required" });
+    const ride = await Ride.findById(rideId);
+    if (!ride) return res.status(404).json({ error: "Ride not found" });
+    if (ride.customerId.toString() !== customerId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+    const allowed = ["requested", "offer_sent", "accepted", "arrived"];
+
+    if (!allowed.includes(ride.status)) {
+      return res.status(400).json({
+        error: `Ride cannot be cancelled now. Current status: ${ride.status}`,
+      });
+    }
+
+    ride.status = "cancelled";
+    ride.cancelledBy = "customer";
+    ride.cancelReason = reason || "Customer cancelled";
+    ride.cancelledAt = new Date();
+    await ride.save();
+    return res.status(200).json({
+      message: "Ride cancelled by customer",
+      ride,
+    });
+  } catch (err) {
+    console.log("CUSTOMER CANCEL ERROR:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+// Ride cancel by driver
+export const driverCancelRide = async (req, res) => {
+  try {
+    const { rideId, driverId, reason } = req.body;
+    if (!rideId || !driverId)
+      return res
+        .status(400)
+        .json({ error: "rideId and driverId are required" });
+    const ride = await Ride.findById(rideId);
+    if (!ride) return res.status(404).json({ error: "Ride not found" });
+    if (ride.driverId?.toString() !== driverId) {
+      return res
+        .status(403)
+        .json({ error: "You are not assigned to this ride" });
+    }
+    const allowed = ["accepted", "arrived", "ongoing"];
+    if (!allowed.includes(ride.status)) {
+      return res.status(400).json({
+        error: `Ride cannot be cancelled in status: ${ride.status}`,
+      });
+    }
+
+    ride.status = "cancelled";
+    ride.cancelledBy = "driver";
+    ride.cancelReason = reason || "Driver cancelled";
+    ride.cancelledAt = new Date();
+    await ride.save();
+    return res.status(200).json({
+      message: "Ride cancelled by driver",
+      ride,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};

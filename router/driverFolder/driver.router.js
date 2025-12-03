@@ -21,6 +21,10 @@ import {
   customerRespondToDriverOffer,
   getAllRide,
   driverAcceptRide,
+  startRide,
+  endRide,
+  customerCancelRide,
+  driverCancelRide,
 } from "../../controller/driverFolder/ride.controller.js";
 
 const router = express.Router();
@@ -54,4 +58,8 @@ router.get("/driverRideRequests", getRideRequestsForDriver);
 router.post("/driver-bargain", driverBargain);
 router.post("/customer-response", customerRespondToDriverOffer);
 router.post("/driverAcceptRide", driverAcceptRide);
+router.post("/startRide", startRide);
+router.post("/endRide", endRide);
+router.post("/customerCancelRide", customerCancelRide);
+router.post("/driverCancelRide", driverCancelRide);
 export default router;
